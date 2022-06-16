@@ -1,66 +1,99 @@
 #include "monty.h"
-#include <string.h>
+/**
+ * _push - push int to a stack
+ * @stack: linked lists for monty stack
+ * @line_number: number of line opcode occurs on
+ */
+void _push(stack_t **stack, __attribute__ ((unused))unsigned int line_number)
+{
+	stack_t *top;
+	(void)line_number;
 
-void free_stack(stack_t **stack);
-int init_stack(stack_t **stack);
-int check_mode(stack_t *stack);
+	top = malloc(sizeof(stack_t));
+	if (top == NULL)
+	{
+		fprintf(stderr, "Error: malloc failed\n");
+		exit(EXIT_FAILURE);
+	}
+
+	top->n = var_global.push_arg;
+	top->next = *stack;
+	top->prev = NULL;
+	if (*stack != NULL)
+		(*stack)->prev = top;
+	*stack = top;
+}
 
 /**
- * free_stack - Frees a stack_t stack.
- * @stack: A pointer to the top (stack) or
- *         bottom (queue) of a stack_t.
+ * _pall - print all function
+ * @stack: pointer to linked list stack
+ * @line_number: number of line opcode occurs on
  */
-void free_stack(stack_t **stack)
+void _pall(stack_t **stack, __attribute__ ((unused))unsigned int line_number)
 {
-	stack_t *tmp = *stack;
+	stack_t *runner;
 
-	while (*stack)
+	runner = *stack;
+	while (runner != NULL)
 	{
-		tmp = (*stack)->next;
-		free(*stack);
-		*stack = tmp;
+		printf("%d\n", runner->n);
+		runner = runner->next;
 	}
 }
 
 /**
- * init_stack - Initializes a stack_t stack with beginning
- *              stack and ending queue nodes.
- * @stack: A pointer to an unitialized stack_t stack.
+ * _pint - print int a top of stack
+ * @stack: pointer to linked list stack
+ * @line_number: number of line opcode occurs on
  *
- * Return: If an error occurs - EXIT_FAILURE.
- *         Otherwise - EXIT_SUCCESS.
  */
-int init_stack(stack_t **stack)
+void _pint(stack_t **stack, unsigned int line_number)
 {
-	stack_t *s;
+	stack_t *runner;
 
-	s = malloc(sizeof(stack_t));
-	if (s == NULL)
-		return (malloc_error());
-
-	s->n = STACK;
-	s->prev = NULL;
-	s->next = NULL;
-
-	*stack = s;
-
-	return (EXIT_SUCCESS);
+	runner = *stack;
+	if (runner == NULL)
+	{
+		fprintf(stderr, "L%d: can't pint, stack empty\n", line_number);
+		exit(EXIT_FAILURE);
+	}
+	printf("%d\n", runner->n);
 }
 
 /**
- * check_mode - Checks if a stack_t linked list is in stack or queue mode.
- * @stack: A pointer to the top (stack) or bottom (queue)
- *         of a stack_t linked list.
- *
- * Return: If the stack_t is in stack mode - STACK (0).
- *         If the stack_t is in queue mode - QUEUE (1).
- *         Otherwise - 2.
+ * _pop - remove element a list
+ *@stack: pointer to first node
+ *@line_number: integer
+ *Return: void
  */
-int check_mode(stack_t *stack)
+void _pop(stack_t **stack, unsigned int line_number)
 {
-	if (stack->n == STACK)
-		return (STACK);
-	else if (stack->n == QUEUE)
-		return (QUEUE);
-	return (2);
+	stack_t *nodo = *stack;
+
+	if (stack == NULL || *stack == NULL)
+	{
+		fprintf(stderr, "L%d: can't pop an empty stack\n", line_number);
+		exit(EXIT_FAILURE);
+	}
+	*stack = nodo->next;
+	if (*stack != NULL)
+		(*stack)->prev = NULL;
+	free(nodo);
+}
+
+/**
+ * free_dlistint - free a list
+ * @head: pointer to first node
+ *
+ */
+void free_dlistint(stack_t *head)
+{
+	stack_t *tmp;
+
+	while (head != NULL)
+	{
+		tmp = head->next;
+		free(head);
+		head = tmp;
+	}
 }
