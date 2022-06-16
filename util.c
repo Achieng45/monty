@@ -1,42 +1,55 @@
-#include <ctype.h>
 #include "monty.h"
 
 /**
- * is_digit - checks if a string is a digit
- * @string: string to check
- *
- * Return: 1 if success, 0 if not
- */
-int is_digit(char *string)
+ * textfile_to_array - reads a text file and prints it to the POSIX
+ * standard output
+ * @filename: pointer to the file name
+ * Return:  the actual number of letters it could read and print
+*/
+
+line_t *textfile_to_array(const char *filename)
 {
-	if (!string || *string == '\0')
-		return (0);
-	if (*string == '-')
-		string++;
-	while (*string)
-	{
-		if (isdigit(*string) == 0)
-			return (0);
-		string++;
-	}
-	return (1);
+FILE *file;
+char *lineBuffer;
+size_t size = 0;
+int lineNumber = 0;
+line_t *lines;
+line_t *tmp;
+
+if (filename == NULL)
+	return (0);
+
+file = fopen(filename, "r");
+
+if (file == NULL)
+{
+	fprintf(stderr, "Error: Can't open file %s\n", filename);
+	exit(EXIT_FAILURE);
 }
-/**
- * isnumber - checks if a string is a number
- * @str: provided string
- *
- * Return: 1 if the string is a number, else, 0.
- */
-int isnumber(char *str)
+
+lineBuffer = NULL;
+
+lines = NULL;
+
+while (getline(&lineBuffer, &size, file) != -1)
 {
-	int i;
 
-	if (!str)
+	tmp = realloc(lines, sizeof(line_t) * (lineNumber + 2));
+	if (tmp == NULL)
+	{
+		fclose(file);
 		return (0);
+	}
+	lines = tmp;
 
-	for (i = 0; str[i]; i++)
-		if (i < '0' || i > '9')
-			return (0);
+	(lines + lineNumber)->content = strdup(lineBuffer);
+	(lines + lineNumber)->number = lineNumber;
+	lineNumber++;
+	tmp = lines;
+}
 
-	return (1);
+free(lineBuffer);
+(lines + lineNumber)->content = NULL;
+fclose(file);
+return (lines);
 }
